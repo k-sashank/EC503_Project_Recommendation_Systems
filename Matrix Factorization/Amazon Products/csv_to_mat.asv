@@ -1,0 +1,19 @@
+X = readtable('Amazon Product Data/product_ratings.csv');
+Y = readtable('Amazon Product Data/id_to_users_mapping.csv');
+
+%X = data(:, {'valence', 'acousticness', 'danceability', 'duration_ms', 'energy', 'instrumentalness', 'liveness', 'loudness', 'speechiness', 'tempo'});
+%all_data = data;
+%X = data(:, {'acousticness', 'energy', 'loudness'});
+
+%X = table2array(X);
+X_ = X(2:size(X, 1), :);
+X = table2array(X);
+X_ = table2array(X_);
+%Y = table2array(Y);
+Y = Y(2:size(Y, 1), :);
+
+save('product_ratings.mat', 'X_');
+save('product_ratings_with_titles.mat', 'X');
+save('user_ids.mat', 'Y');
+%save('music_data_with_titles.mat', 'all_data');
+

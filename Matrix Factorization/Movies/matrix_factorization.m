@@ -1,45 +1,45 @@
+close all
+clear
+
 load movie_ratings.mat
-
+tic
 K = 3;
+num_epochs = 10000; % code is vectorized so we can run more epochs
+alpha = 0.00003;
+beta = 0.03;
 
-alpha = 0.00002;
-beta = 0.0002;
+rng(21); % reproducibility
 
 P = randn(size(Y, 1), K);
 Q = randn(K, size(Y, 2));
 
-for epoch = 1:5000
-    for i = 1:size(Y, 1)
-        for j = 1:size(Y, 2)
-            if Y(i, j) > 0
-                err = Y(i, j) - P(i, :) * Q(:, j);
-                for k = 1:K
-                P(i, k) = P(i, k) + alpha * (2 * err * Q(k, j) - beta * P(i, k));
-                Q(k, j) = Q(k, j) + alpha * (2 * err * P(i, k) - beta * Q(k, j));
-                end
-            end
-        end
-    end
-    eR = P*Q;
-    e = 0;
-    for i = 1:size(Y, 1)
-        for j = 1:size(Y, 2)
-            if Y(i, j) > 0
-                e = e + power(Y(i, j) - P(i, :) * Q(:, j), 2);
-                for k = 1:K
-                    e = e + (beta / 2) * (power(P(i, k), 2) + power(Q(k, j), 2));
-                end
-            end
-        end
-    end
-    if e < 0.01
+mask = (Y > 0);
+
+P_iter = P;
+Q_iter = Q;
+
+for epoch = 1:num_epochs
+
+    E = (Y - P_iter * Q_iter) .* mask;
+
+    P_grad = -2 * E * Q_iter' + beta * P_iter;
+    Q_grad = -2 * P_iter' * E + beta * Q_iter;
+
+    P_iter = P_iter - alpha * P_grad;
+    Q_iter = Q_iter - alpha * Q_grad;
+
+    total_error = sum(sum(E.^2)) + beta * (sum(sum(P_iter.^2)) + sum(sum(Q_iter.^2)));
+
+    if total_error < 0.01
         break;
     end
 end
 
-Y_pred = P*Q;
+Y_pred = P_iter * Q_iter;
 
-RMSE = sqrt(mean((Y(Y ~= 0) - Y_pred(Y ~= 0)).^2));
+RMSE = sqrt(mean((Y(mask) - Y_pred(mask)).^2));
+
 fprintf('RMSE: %.4f\n', RMSE);
+toc
 
 save('predicted_movie_ratings.mat', 'Y_pred');

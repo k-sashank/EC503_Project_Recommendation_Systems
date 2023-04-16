@@ -1,4 +1,4 @@
-function movie_name = predict_movies(user_id)
+function predict_movies(user_id)
     load predicted_movie_ratings.mat Y_pred
     
     ratings = Y_pred(user_id, :);

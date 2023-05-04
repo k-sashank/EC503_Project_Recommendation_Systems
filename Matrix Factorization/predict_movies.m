@@ -1,17 +1,17 @@
 function predict_movies(user_id)
-    load predicted_movie_ratings.mat Y_pred
-    
-    ratings = Y_pred(user_id, :);
-    ratings = ratings(:, 2:size(ratings, 2));
-    [~, I] = maxk(ratings, 5);
+    load predicted_movie_ratings.mat predicted_ratings
+
     fid = fopen('user_ratings.csv', 'r');
     headerLine = fgetl(fid);
     fclose(fid);
-    
+
     movies_list = textscan(headerLine, '%s', 'Delimiter', ',');
-    
     movies_list = movies_list{1};
     movies_list = movies_list(2: size(movies_list));
+    
+    ratings = predicted_ratings(user_id, :);
+    ratings = ratings(:, 1:length(movies_list));
+    [~, I] = maxk(ratings, 5);
     
     fprintf("Recommended Movies for User ID %d:\n", user_id);
     for i = 1:5
